@@ -1,6 +1,8 @@
 import pandas
 import itertools
 from math import inf
+import csv
+import pandas as pd
 
 class Discretize():
 
@@ -21,6 +23,17 @@ class Discretize():
         All other member variables are set back to empty list or None value
         """
         print("Reading data from ",path)
+        
+        temp = []
+
+        with open(path) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+
+    
+            for row in csv_reader:
+                temp.append(row)
+
+        self.df = pd.DataFrame(temp)
     
     def write(self, path):
         """
@@ -28,6 +41,16 @@ class Discretize():
         The transformed dataframe is stored at the given path in CSV format.
         """
         print("Writing data at ",path)
+        temp = []
+
+        for index, val in self.df.iterrows():
+            temp.append([val[0], val[1], val[2]])
+
+        my_df = pd.DataFrame(temp)
+
+        my_df.to_csv(path, index=False, header=False)
+
+        
 
     def transform(self):
         print("Starting transformation")
