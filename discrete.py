@@ -34,6 +34,11 @@ class Discretize():
                 temp.append(row)
 
         self.df = pd.DataFrame(temp)
+        self.initial_cuts = []
+        self.final_cuts = {}
+        self.attributes = []
+        self.dec = None
+        self.trans_df = None
     
     def write(self, path):
         """
@@ -43,7 +48,7 @@ class Discretize():
         print("Writing data at ",path)
         temp = []
 
-        for index, val in self.df.iterrows():
+        for index, val in self.trans_df.iterrows():
             temp.append([val[0], val[1], val[2]])
 
         my_df = pd.DataFrame(temp)
@@ -64,8 +69,12 @@ class Discretize():
         The cuts are generated to discretize the table using the discernibilty formulas algorithm.
         """
         print("Generating cuts")
+        
         self.attributes = list(self.df.columns)[:-1]
         self.dec = list(self.df.columns)[-1]
+
+        for attribute in self.attributes:
+            self.df[attribute] = self.df[attribute].astype('float')
 
         labels = list(self.df[self.dec].unique())
         indices_to_pair = [ self.df.index[ self.df[self.dec] == label ].tolist() for label in labels ]
@@ -85,21 +94,21 @@ class Discretize():
                     cuts[index] = []
                 cuts[index].append(cut)
                 
-        rows = dict.fromkeys(pairs,set())
-        cols = dict.fromkeys(self.initial_cuts,set())
+        rows = {pair: set() for pair in pairs}
+        cols = {cut: set() for cut in self.initial_cuts}
 
         for pair in pairs:
             x1, x2 = pair
             for index,attri in enumerate(self.attributes):
                 for cut in cuts[index]:
                     if self.df.loc[x1, attri] < cut < self.df.loc[x2, attri] or self.df.loc[x2, attri] < cut < self.df.loc[x1, attri] :
-                        rows[pair].add( (index, cut) )
+                        rows[(x1, x2)].add( (index, cut) )
                         cols[(index, cut)].add(pair)
         
         while bool(rows):
             counts =[(len(value), key[0], key[1]) for key,value in cols.items()]
             optimal_cut = sorted(counts, key = lambda x: (-x[0],x[1],x[2]))[0][1:]
-            discern_rows = cols[optimal_cut]
+            discern_rows = set(cols[optimal_cut])
             for col in cols.keys():
                 cols[col].difference_update(discern_rows)
             for row in discern_rows:
@@ -107,6 +116,10 @@ class Discretize():
             if optimal_cut[0] not in self.final_cuts:
                 self.final_cuts[ optimal_cut[0] ] = []
             self.final_cuts[ optimal_cut[0] ].append(optimal_cut[1])
+        
+        for cut in self.final_cuts:
+            self.final_cuts[cut] = sorted(self.final_cuts[cut])
+        
 
     def __transform_df(self):
         """
