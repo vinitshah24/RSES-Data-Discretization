@@ -128,7 +128,7 @@ class Discretize():
         eg : self.final_cuts = {0: [0.9, 1.5], 1: [0.75, 1.5] } where key is the attribute index and value is list of cuts
         """
         print("Transforming dataframe")
-        df = pd.read_csv('RSES_data.txt')# --> Need to discuss in call
+        df = self.df
         ranges = self.final_cuts
         for key, val in ranges.items():
             val.insert(0, -math.inf)
