@@ -11,7 +11,7 @@ class Discretize():
         self.df = None
         self.attributes = []
         self.dec = None
-        print("Discretize object instantiated")
+        print("\nDiscretize object instantiated")
     
     def read(self, path):
         """
@@ -20,7 +20,7 @@ class Discretize():
         The input data is stored into the "df" member variable as a pandas dataframe object.
         All other member variables are set back to empty list or None value
         """
-        print("Reading data from ",path)
+        print("\nReading data from ",path)
         
         temp = []
 
@@ -32,6 +32,8 @@ class Discretize():
                 temp.append(row)
 
         self.df = pd.DataFrame(temp)
+        print("\nData ")
+        print(self.df)
         self.initial_cuts = []
         self.final_cuts = {}
         self.attributes = []
@@ -42,7 +44,7 @@ class Discretize():
         This function/method takes in the path of the output data file.
         The transformed dataframe is stored at the given path in CSV format.
         """
-        print("Writing data at ",path)
+        print("Writing data at ",path,"\n")
         temp = []
 
         for index, val in self.df.iterrows():
@@ -55,17 +57,17 @@ class Discretize():
         
 
     def transform(self):
-        print("Starting transformation")
+        print("\nStarting transformation")
         self.__generate_cuts()
         self.__transform_df()
-        print("Transformation complete")
+        print("\nTransformation complete")
     
     def __generate_cuts(self):
         """
         This private function/method takes in no parameter.
         The cuts are generated to discretize the table using the discernibilty formulas algorithm.
         """
-        print("Generating cuts")
+        print("\nGenerating cuts")
         
         self.attributes = list(self.df.columns)[:-1]
         self.dec = list(self.df.columns)[-1]
@@ -113,6 +115,7 @@ class Discretize():
             if optimal_cut[0] not in self.final_cuts:
                 self.final_cuts[ optimal_cut[0] ] = []
             self.final_cuts[ optimal_cut[0] ].append(optimal_cut[1])
+            print("Optimal cut for column {} : {}".format(*optimal_cut))
         
         for cut in self.final_cuts:
             self.final_cuts[cut] = sorted(self.final_cuts[cut])
@@ -124,11 +127,13 @@ class Discretize():
         The df dataframe is transformed and stored into the trans_df using the final cuts list.
         eg : self.final_cuts = {0: [0.9, 1.5], 1: [0.75, 1.5] } where key is the attribute index and value is list of cuts
         """
-        print("Transforming dataframe")
+        print("\nTransforming dataframe")
         for key, val in self.final_cuts.items():
             val.insert(0, -inf)
             val.append(inf)
             self.df[self.df.columns[key]] = pd.cut(x=self.df[self.df.columns[key]], bins=val, duplicates='drop')
+        print("\nDiscretized Data")
+        print(self.df)
 
 if __name__ == "__main__":
     D = Discretize()
