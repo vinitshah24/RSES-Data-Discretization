@@ -1,4 +1,3 @@
-import pandas
 import itertools
 from math import inf
 import csv
@@ -12,7 +11,6 @@ class Discretize():
         self.df = None
         self.attributes = []
         self.dec = None
-        self.trans_df = None
         print("Discretize object instantiated")
     
     def read(self, path):
@@ -38,7 +36,6 @@ class Discretize():
         self.final_cuts = {}
         self.attributes = []
         self.dec = None
-        self.trans_df = None
     
     def write(self, path):
         """
@@ -48,8 +45,8 @@ class Discretize():
         print("Writing data at ",path)
         temp = []
 
-        for index, val in self.trans_df.iterrows():
-            temp.append([val[0], val[1], val[2]])
+        for index, val in self.df.iterrows():
+            temp.append([val[i] for i in range(len(val))])
 
         my_df = pd.DataFrame(temp)
 
@@ -128,12 +125,10 @@ class Discretize():
         eg : self.final_cuts = {0: [0.9, 1.5], 1: [0.75, 1.5] } where key is the attribute index and value is list of cuts
         """
         print("Transforming dataframe")
-        df = self.df
-        ranges = self.final_cuts
-        for key, val in ranges.items():
-            val.insert(0, -math.inf)
-            val.append(math.inf)
-            df[df.columns[key]] = pd.cut(x=df[df.columns[key]], bins=val, duplicates='drop')
+        for key, val in self.final_cuts.items():
+            val.insert(0, -inf)
+            val.append(inf)
+            self.df[self.df.columns[key]] = pd.cut(x=self.df[self.df.columns[key]], bins=val, duplicates='drop')
 
 if __name__ == "__main__":
     D = Discretize()
