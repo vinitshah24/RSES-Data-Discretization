@@ -44,7 +44,7 @@ class Discretize():
         This function/method takes in the path of the output data file.
         The transformed dataframe is stored at the given path in CSV format.
         """
-        print("Writing data at ",path,"\n")
+        print("\nWriting data at ",path,"\n")
         temp = []
 
         for index, val in self.df.iterrows():
@@ -104,6 +104,7 @@ class Discretize():
                         rows[(x1, x2)].add( (index, cut) )
                         cols[(index, cut)].add(pair)
         
+        i = 1
         while bool(rows):
             counts =[(len(value), key[0], key[1]) for key,value in cols.items()]
             optimal_cut = sorted(counts, key = lambda x: (-x[0],x[1],x[2]))[0][1:]
@@ -115,7 +116,8 @@ class Discretize():
             if optimal_cut[0] not in self.final_cuts:
                 self.final_cuts[ optimal_cut[0] ] = []
             self.final_cuts[ optimal_cut[0] ].append(optimal_cut[1])
-            print("Optimal cut for column {} : {}".format(*optimal_cut))
+            print("Optimal cut #{} for column {} : {}".format(i,*optimal_cut))
+            i += 1
         
         for cut in self.final_cuts:
             self.final_cuts[cut] = sorted(self.final_cuts[cut])
@@ -136,7 +138,9 @@ class Discretize():
         print(self.df)
 
 if __name__ == "__main__":
+    Input = input("Enter the input file location : ")      #data.txt
+    Output = input("Enter the output file location : ")    #discretize_data.csv
     D = Discretize()
-    D.read("data.txt")
+    D.read(Input)
     D.transform()
-    D.write("discretized_data.csv")
+    D.write(Output)
